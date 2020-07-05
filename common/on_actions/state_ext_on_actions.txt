@@ -1,0 +1,81 @@
+###
+# Code by Fernando (Godspeed: A Flame for Winter)
+###
+
+on_actions = {
+	on_startup = {
+		effect = {
+			# Example:
+			# This state flag tells that a scripted_effect has been implemented.
+			# You will have to do this manually.
+			506 = { set_state_flag = on_change_controller_effect_implemented }
+			BLO = { set_country_flag = on_lose_state_effect_implemented }
+			BLO = { set_country_flag = on_gain_state_effect_implemented }
+			
+			
+		}
+	}
+	on_state_control_changed = {
+		effect = {
+			# Quick tutorial
+			# This uses Scripted Effects and defers the effect to them.
+			# The scripted effect must be TAG_on_lose_state, TAG_on_gain_state or STATEID_on_change_controller
+			
+			# TAG_on_lose_state -> when the tag loses control of a state.
+			# Requires that tag to have the on_lose_state_effect_implemented country flag set.
+			
+			# TAG_on_gain_state -> when the tag gains control of a state.
+			# Requires that tag to have the on_gain_state_effect_implemented country flag set.
+			
+			# STATEID_on_change_controller -> when the state's controller is changed.
+			# Requires that state to have the on_change_controller_effect_implemented state flag set.
+			
+			set_variable = { global.NEW_CONTROLLER = ROOT }
+			set_variable = { global.OLD_CONTROLLER = FROM }
+			set_variable = { global.STATE = FROM.FROM }
+			
+			FROM = {
+				if = {
+					limit = {
+						has_country_flag = on_lose_state_effect_implemented
+					}
+					meta_effect = {
+						text = { [SCRIPTED] = yes }
+						SCRIPTED = "[THIS.GetTag]_on_lose_state"
+					}
+				}
+			}
+			
+			ROOT = {
+				if = {
+					limit = {
+						has_country_flag = on_gain_state_effect_implemented
+					}
+					meta_effect = {
+						text = { [SCRIPTED] = yes }
+						SCRIPTED = "[THIS.GetTag]_on_gain_state"
+					}
+				}
+			}
+			
+			# Example 400_on_change_controller
+			FROM.FROM = {
+				if = {
+					limit = {
+						has_state_flag = on_change_controller_effect_implemented
+					}
+					
+					meta_effect = {
+						text = { [SCRIPTED] = yes }
+						SCRIPTED = "[THIS.GetID]_on_change_controller"
+					}
+				}
+			}
+			
+			
+			clear_variable = global.NEW_CONTROLLER
+			clear_variable = global.OLD_CONTROLLER
+			clear_variable = global.STATE
+		}
+	}
+}
